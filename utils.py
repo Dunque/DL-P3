@@ -7,6 +7,12 @@ def sample_batch(dataset):
         batch = batch[0]
     return batch.numpy()
 
+def sample_batch_from_dataset(dataset, n=1):
+    batch = dataset.take(n)
+    if isinstance(batch, tuple):
+        batch = batch[0]
+    return batch.numpy()
+
 
 def display(images, n=10, size=(20, 3), cmap="gray_r", as_type="float32", save_to=None):
     """
@@ -27,4 +33,14 @@ def display(images, n=10, size=(20, 3), cmap="gray_r", as_type="float32", save_t
         plt.savefig(save_to)
         print(f"\nSaved to {save_to}")
 
+    plt.show()
+
+def display_one(image):
+    if image.max() > 1.0:
+        image = image / 255.0
+    elif image.min() < 0.0:
+        image = (image + 1.0) / 2.0
+        
+    plt.imshow(image.astype("float32"), cmap="gray_r")
+    plt.axis("off")
     plt.show()
