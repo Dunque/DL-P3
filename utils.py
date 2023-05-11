@@ -44,3 +44,21 @@ def display_one(image):
     plt.imshow(image.astype("float32"), cmap="gray_r")
     plt.axis("off")
     plt.show()
+    
+def display_list(images_list):
+    """
+    Displays n random images from each one of the supplied arrays.
+    """
+    for images in images_list:
+        if images.max() > 1.0:
+            images = images / 255.0
+        elif images.min() < 0.0:
+            images = (images + 1.0) / 2.0
+    
+    plt.figure(figsize=(20, 3))
+    for i in range(len(images_list)):
+        _ = plt.subplot(1, 10, i + 1)
+        plt.imshow(images_list[i].astype('uint8'), cmap="gray_r")
+        plt.axis("off")
+
+    plt.show()
