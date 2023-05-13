@@ -26,10 +26,10 @@ CHANNELS = 3
 
 BATCH_SIZE = 128
 NUM_FEATURES = 128
-Z_DIM = [64, 128, 256]
+Z_DIM = [128, 256]
 
 EPOCHS = 10
-STEPS_PER_EPOCH = [500, 1000, 1500]
+STEPS_PER_EPOCH = [1000, 1500]
 
 LEARNING_RATE = 0.0002
 CRITIC_STEPS = [2,3,4]
@@ -80,34 +80,35 @@ for steps in STEPS_PER_EPOCH:
         for crit in CRITIC_STEPS:
             
             critic_input = layers.Input(shape=(IMAGE_SIZE, IMAGE_SIZE, CHANNELS))
-            x = layers.Conv2D(64, kernel_size=4, strides=2, padding="same")(critic_input)
+            x = layers.Conv2D(64, kernel_size=2, strides=2, padding="same")(critic_input)
             x = layers.LeakyReLU(0.2)(x)
-            x = layers.Conv2D(128, kernel_size=4, strides=2, padding="same")(x)
+            x = layers.Conv2D(128, kernel_size=2, strides=2, padding="same")(x)
             x = layers.LeakyReLU()(x)
             x = layers.Dropout(0.3)(x)
-            x = layers.Conv2D(256, kernel_size=4, strides=2, padding="same")(x)
+            x = layers.Conv2D(256, kernel_size=2, strides=2, padding="same")(x)
             x = layers.LeakyReLU(0.2)(x)
             x = layers.Dropout(0.3)(x)
-            x = layers.Conv2D(1, kernel_size=4, strides=1, padding="valid")(x)
+            x = layers.Conv2D(1, kernel_size=2, strides=1, padding="same")(x)
             critic_output = layers.Flatten()(x)
 
             critic = models.Model(critic_input, critic_output)
-            critic.summary()
 
-            # %%
             generator_input = layers.Input(shape=(z,))
             x = layers.Reshape((1, 1, z))(generator_input)
-            x = layers.Conv2DTranspose(256, kernel_size=4, strides=1, padding="valid", use_bias=False)(x)
+            x = layers.Conv2DTranspose(256, kernel_size=2, strides=1, padding="valid", use_bias=False)(x)
             x = layers.BatchNormalization(momentum=0.9)(x)
             x = layers.LeakyReLU(0.2)(x)
-            x = layers.Conv2DTranspose(128, kernel_size=4, strides=2, padding="same", use_bias=False)(x)
+            x = layers.Conv2DTranspose(128, kernel_size=2, strides=2, padding="same", use_bias=False)(x)
             x = layers.BatchNormalization(momentum=0.9)(x)
             x = layers.LeakyReLU(0.2)(x)
-            x = layers.Conv2DTranspose(64, kernel_size=4, strides=2, padding="same", use_bias=False)(x)
+            x = layers.Conv2DTranspose(64, kernel_size=2, strides=2, padding="same", use_bias=False)(x)
             x = layers.BatchNormalization(momentum=0.9)(x)
             x = layers.LeakyReLU(0.2)(x)
-            generator_output = layers.Conv2DTranspose(CHANNELS, kernel_size=4, strides=2, padding="same", activation="tanh")(x)
+            generator_output = layers.Conv2DTranspose(CHANNELS, kernel_size=2, strides=2, padding="same", activation="tanh")(x)
+
             generator = models.Model(generator_input, generator_output)
+
+            critic.summary()
             generator.summary()
 
             # %%
@@ -320,7 +321,7 @@ for steps in STEPS_PER_EPOCH:
             
             df = pd.concat([df, pd.DataFrame([[steps, z, crit, loss_history.history['c_loss'][-1], loss_history.history['g_loss'][-1],
                                                loss_history.history['c_acc'][-1], loss_history.history['g_acc'][-1]]],
-                                             columns=['steps_per_epoch', 'z_dim', 'critic_steps', 'c_loss', 'g_loss', 'c_acc', 'g_acc', 'fid'])])
+                                             columns=['steps_per_epoch', 'z_dim', 'critic_steps', 'c_loss', 'g_loss', 'c_acc', 'g_acc'])])
             
 # Save the results in a tex file
 df.to_latex('./latex/WGAN.tex', index=False)
